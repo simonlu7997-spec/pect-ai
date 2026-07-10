@@ -601,3 +601,21 @@ func GetPendingUsdtTopUps() ([]*TopUp, error) {
 	}
 	return topUps, nil
 }
+
+// HasPendingUsdtOrderByAmount checks if there's any pending USDT order with the exact same Money amount.
+// Used to prevent amount collision when multiple users deposit at the same time.
+func HasPendingUsdtOrderByAmount(money float64) (bool, error) {
+	var count int64
+	moneyCol := "`money`"
+	if common.UsingMainDatabase(common.DatabaseTypePostgreSQL) {
+		moneyCol = `"money"`
+	}
+	err := DB.Model(&TopUp{}).
+		Where("status = ? AND payment_provider = ? AND "+moneyCol+" = ?",
+			common.TopUpStatusPending, PaymentProviderUSDT, money).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

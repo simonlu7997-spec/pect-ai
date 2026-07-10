@@ -119,6 +119,17 @@ func RequestUsdtPay(c *gin.Context) {
 		return
 	}
 
+	// Check for amount collision: prevent multiple pending orders with the same USDT amount
+	collision, err := model.HasPendingUsdtOrderByAmount(payMoney)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "检查待处理订单失败"})
+		return
+	}
+	if collision {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": fmt.Sprintf("金额 %.2f USDT 已有其他待处理订单，请换一个充值金额", payMoney)})
+		return
+	}
+
 	tradeNo := fmt.Sprintf("USDT%dNO%s%d", id, common.GetRandomString(6), time.Now().Unix())
 	topUp := &model.TopUp{
 		UserId:          id,

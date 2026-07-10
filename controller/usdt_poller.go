@@ -147,16 +147,22 @@ func pollUsdtTransactions() {
 		common.SysLog(fmt.Sprintf("USDT poller: detected tx=%s from=%s amount=%.2f to=%s", txID, tx.From, usdtAmount, tx.To))
 
 		// Find matching pending order
+		matched := false
 		for _, order := range orders {
 			dOrderMoney := decimal.NewFromFloat(order.Money)
 			dTxAmount := decimal.NewFromFloat(usdtAmount)
 			diff := dTxAmount.Sub(dOrderMoney).Abs()
 
-			if diff.LessThanOrEqual(decimal.NewFromFloat(0.01)) {
-				common.SysLog(fmt.Sprintf("USDT poller: MATCH! order=%s user=%d tx=%s amount=%.2f", order.TradeNo, order.UserId, txID, usdtAmount))
+			if diff.LessThanOrEqual(decimal.NewFromFloat(0.10)) {
+				common.SysLog(fmt.Sprintf("USDT poller: MATCH! order=%s user=%d tx=%s amount=%.2f (order=%.2f diff=%.4f)", order.TradeNo, order.UserId, txID, usdtAmount, order.Money, diff.InexactFloat64()))
 				confirmUsdtOrder(order, txID)
+				matched = true
 				break
 			}
+		}
+
+		if !matched {
+			common.SysError(fmt.Sprintf("USDT poller: UNMATCHED transaction! tx=%s from=%s amount=%.2f — 未匹配到任何待处理订单，请人工确认", txID, tx.From, usdtAmount))
 		}
 	}
 
