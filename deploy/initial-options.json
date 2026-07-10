@@ -1,0 +1,68 @@
+{
+  "site": [
+    { "key": "SystemName", "value": "PECT AI" },
+    { "key": "ServerAddress", "value": "https://ai.pect-dapp.io/" },
+    { "key": "theme.frontend", "value": "classic" },
+    { "key": "Logo", "value": "" },
+    { "key": "Footer", "value": "2026 PECT AI" },
+    { "key": "HomePageContent", "value": "" },
+    { "key": "DocsLink", "value": "https://ai.pect-dapp.io" }
+  ],
+  "auth": [
+    { "key": "RegisterEnabled", "value": "true" },
+    { "key": "PasswordRegisterEnabled", "value": "true" },
+    { "key": "PasswordLoginEnabled", "value": "true" },
+    { "key": "EmailVerificationEnabled", "value": "false" },
+    { "key": "TurnstileCheckEnabled", "value": "false" },
+    { "key": "GitHubOAuthEnabled", "value": "false" },
+    { "key": "TelegramOAuthEnabled", "value": "false" },
+    { "key": "LinuxDOOAuthEnabled", "value": "false" },
+    { "key": "WeChatAuthEnabled", "value": "false" }
+  ],
+  "billing": [
+    { "key": "DisplayInCurrencyEnabled", "value": "true" },
+    { "key": "QuotaDisplayType", "value": "USD" },
+    { "key": "QuotaPerUnit", "value": "500000" },
+    { "key": "QuotaForNewUser", "value": "0" },
+    { "key": "QuotaForInviter", "value": "0" },
+    { "key": "QuotaForInvitee", "value": "0" },
+    { "key": "MinTopUp", "value": "10" },
+    { "key": "TopupGroupRatio", "value": "{\"default\":1,\"spark\":1,\"private\":1}" },
+    { "key": "GroupRatio", "value": "{\"default\":1,\"spark\":1,\"private\":1}" },
+    { "key": "UserUsableGroups", "value": "{\"default\":\"默认客户\",\"spark\":\"Spark 专用客户\",\"private\":\"私有客户\"}" },
+    { "key": "AutoGroups", "value": "[\"default\"]" },
+    { "key": "DefaultUseAutoGroup", "value": "false" }
+  ],
+  "usdt": [
+    { "key": "UsdtEnabled", "value": "${USDT_ENABLED}" },
+    { "key": "UsdtNetwork", "value": "${USDT_NETWORK}" },
+    { "key": "UsdtAddress", "value": "${USDT_ADDRESS}" },
+    { "key": "UsdtUnitPrice", "value": "1" },
+    { "key": "UsdtMinTopUp", "value": "10" },
+    { "key": "UsdtInstructions", "value": "请按页面显示的网络和金额转入 USDT，完成后提交订单号和交易哈希给客服确认。仅向页面展示地址转账，不要向任何私聊地址转账。" }
+  ],
+  "content": [
+    { "key": "console_setting.announcements_enabled", "value": "true" },
+    { "key": "console_setting.announcements", "value": "[{\"id\":1,\"content\":\"PECT AI 已上线。客户请使用 https://ai.pect-dapp.io/v1 作为 API 地址，并妥善保管自己的 API Key。\",\"publishDate\":\"2026-07-08T00:00:00+08:00\",\"type\":\"success\",\"extra\":\"上线公告\"}]" },
+    { "key": "console_setting.api_info_enabled", "value": "true" },
+    { "key": "console_setting.api_info", "value": "[{\"id\":1,\"url\":\"https://ai.pect-dapp.io/v1\",\"route\":\"OpenAI Compatible\",\"description\":\"OpenAI 兼容接口地址\",\"color\":\"blue\"},{\"id\":2,\"url\":\"https://ai.pect-dapp.io/v1/models\",\"route\":\"Model List\",\"description\":\"查看可用模型\",\"color\":\"green\"}]" },
+    { "key": "console_setting.faq_enabled", "value": "true" },
+    { "key": "console_setting.faq", "value": "[{\"id\":1,\"question\":\"客户端 Base URL 应该填什么？\",\"answer\":\"OpenAI 兼容客户端通常填写 https://ai.pect-dapp.io/v1。\"},{\"id\":2,\"question\":\"客户应该使用 Spark 的公网地址吗？\",\"answer\":\"不应该。客户只访问 PECT AI；Spark 只作为私有上游由平台调度。\"},{\"id\":3,\"question\":\"USDT 充值多久入账？\",\"answer\":\"当前为人工确认模式。转账后请保留交易哈希，管理员确认后入账。\"}]" },
+    { "key": "console_setting.uptime_kuma_enabled", "value": "false" },
+    { "key": "faq_enabled", "value": "true" },
+    { "key": "announcements_enabled", "value": "true" },
+    { "key": "api_info_enabled", "value": "true" }
+  ],
+  "operations": [
+    { "key": "DemoSiteEnabled", "value": "false" },
+    { "key": "SelfUseModeEnabled", "value": "false" },
+    { "key": "DataExportEnabled", "value": "true" },
+    { "key": "DrawingEnabled", "value": "true" },
+    { "key": "TaskEnabled", "value": "true" },
+    { "key": "DefaultCollapseSidebar", "value": "false" },
+    { "key": "RetryTimes", "value": "2" },
+    { "key": "AutomaticDisableChannelEnabled", "value": "true" },
+    { "key": "AutomaticEnableChannelEnabled", "value": "true" },
+    { "key": "ChannelDisableThreshold", "value": "5" }
+  ]
+}
