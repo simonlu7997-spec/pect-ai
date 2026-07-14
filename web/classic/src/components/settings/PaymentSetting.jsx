@@ -25,6 +25,7 @@ import SettingsPaymentGatewayStripe from '../../pages/Setting/Payment/SettingsPa
 import SettingsPaymentGatewayCreem from '../../pages/Setting/Payment/SettingsPaymentGatewayCreem';
 import SettingsPaymentGatewayWaffo from '../../pages/Setting/Payment/SettingsPaymentGatewayWaffo';
 import SettingsPaymentGatewayUsdt from '../../pages/Setting/Payment/SettingsPaymentGatewayUsdt';
+import SettingsPaymentGatewayC2Coin from '../../pages/Setting/Payment/SettingsPaymentGatewayC2Coin';
 import { API, showError, showSuccess, toBoolean } from '../../helpers';
 import { useTranslation } from 'react-i18next';
 import RiskAcknowledgementModal from '../common/modals/RiskAcknowledgementModal';
@@ -306,6 +307,13 @@ const PaymentSetting = () => {
               </Tabs.TabPane>
               <Tabs.TabPane tab={t('USDT 设置')} itemKey='usdt'>
                 <SettingsPaymentGatewayUsdt
+                  options={inputs}
+                  refresh={onRefresh}
+                  hideSectionTitle
+                />
+              </Tabs.TabPane>
+              <Tabs.TabPane tab={t('C2-Coin 设置')} itemKey='c2coin'>
+                <SettingsPaymentGatewayC2Coin
                   options={inputs}
                   refresh={onRefresh}
                   hideSectionTitle

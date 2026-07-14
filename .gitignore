@@ -21,3 +21,6 @@ backup-wallet-usdt-only-*
 web/default/dist/static/
 one-api.db*
 *.bak*
+
+# Database files
+*.db

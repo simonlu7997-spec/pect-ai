@@ -91,6 +91,7 @@ const RechargeCard = ({
   enableWaffoTopUp,
   enableWaffoPancakeTopUp,
   enableUsdtTopUp,
+  enableC2CoinTopUp,
   subscriptionLoading = false,
   subscriptionPlans = [],
   billingPreference,
@@ -236,7 +237,7 @@ const RechargeCard = ({
           enableCreemTopUp ||
           enableWaffoTopUp ||
           enableWaffoPancakeTopUp ||
-          enableUsdtTopUp ? (
+          enableUsdtTopUp || enableC2CoinTopUp ? (
           <Form
             getFormApi={(api) => (onlineFormApiRef.current = api)}
             initValues={{ topUpCount: topUpCount }}
@@ -325,16 +326,20 @@ const RechargeCard = ({
                               payMethod.type === 'waffo_pancake';
                             const isUsdt =
                               payMethod.type === 'usdt';
+                            const isC2Coin =
+                              payMethod.type === 'c2coin';
                             const disabled =
                               (!enableOnlineTopUp &&
                                 !isStripe &&
                                 !isWaffo &&
                                 !isWaffoPancake &&
-                                !isUsdt) ||
+                                !isUsdt &&
+                                !isC2Coin) ||
                               (!enableStripeTopUp && isStripe) ||
                               (!enableWaffoTopUp && isWaffo) ||
                               (!enableWaffoPancakeTopUp && isWaffoPancake) ||
                               (!enableUsdtTopUp && isUsdt) ||
+                              (!enableC2CoinTopUp && isC2Coin) ||
                               minTopupVal > Number(topUpCount || 0);
 
                             const buttonEl = (
@@ -379,6 +384,11 @@ const RechargeCard = ({
                                       }}
                                     />
                                   ) : payMethod.type === 'usdt' ? (
+                                    <Coins
+                                      size={18}
+                                      color='#26A17B'
+                                    />
+                                  ) : payMethod.type === 'c2coin' ? (
                                     <Coins
                                       size={18}
                                       color='#26A17B'

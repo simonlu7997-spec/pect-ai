@@ -30,11 +30,13 @@ const (
 	PaymentMethodWaffo        = "waffo"
 	PaymentMethodWaffoPancake = "waffo_pancake"
 	PaymentMethodUSDT          = "usdt"
+	PaymentMethodC2Coin        = "c2coin"
 	PaymentMethodBalance      = "balance"
 )
 
 const (
 	PaymentProviderUSDT        = "usdt"
+	PaymentProviderC2Coin      = "c2coin"
 	PaymentProviderEpay         = "epay"
 	PaymentProviderStripe       = "stripe"
 	PaymentProviderCreem        = "creem"

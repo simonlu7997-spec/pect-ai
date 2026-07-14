@@ -181,6 +181,13 @@ func InitOptionMap() {
 	common.OptionMap["UsdtUnitPrice"] = strconv.FormatFloat(setting.UsdtUnitPrice, 'f', -1, 64)
 	common.OptionMap["UsdtMinTopUp"] = strconv.Itoa(setting.UsdtMinTopUp)
 	common.OptionMap["UsdtInstructions"] = setting.UsdtInstructions
+	common.OptionMap["C2CoinEnabled"] = strconv.FormatBool(setting.C2CoinEnabled)
+	common.OptionMap["C2CoinContractAddr"] = setting.C2CoinContractAddr
+	common.OptionMap["C2CoinNetwork"] = setting.C2CoinNetwork
+	common.OptionMap["C2CoinExchangeRate"] = strconv.Itoa(setting.C2CoinExchangeRate)
+	common.OptionMap["C2CoinMinTopUp"] = strconv.Itoa(setting.C2CoinMinTopUp)
+	common.OptionMap["C2CoinInstructions"] = setting.C2CoinInstructions
+	common.OptionMap["C2CoinBurnAddress"] = setting.C2CoinBurnAddress
 	common.OptionMap["TronGridApiKey"] = setting.TronGridApiKey
 
 	// 自动添加所有注册的模型配置
@@ -487,6 +494,20 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.UsdtMinTopUp, _ = strconv.Atoi(value)
 	case "UsdtInstructions":
 		setting.UsdtInstructions = value
+	case "C2CoinEnabled":
+		setting.C2CoinEnabled = value == "true"
+	case "C2CoinContractAddr":
+		setting.C2CoinContractAddr = value
+	case "C2CoinNetwork":
+		setting.C2CoinNetwork = value
+	case "C2CoinExchangeRate":
+		setting.C2CoinExchangeRate, _ = strconv.Atoi(value)
+	case "C2CoinMinTopUp":
+		setting.C2CoinMinTopUp, _ = strconv.Atoi(value)
+	case "C2CoinInstructions":
+		setting.C2CoinInstructions = value
+	case "C2CoinBurnAddress":
+		setting.C2CoinBurnAddress = value
 	case "TronGridApiKey":
 		setting.TronGridApiKey = value
 	case "TopupGroupRatio":

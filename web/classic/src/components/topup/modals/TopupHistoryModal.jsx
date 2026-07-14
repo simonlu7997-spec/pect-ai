@@ -55,6 +55,7 @@ const PAYMENT_METHOD_MAP = {
   alipay: '支付宝',
   wxpay: '微信',
   usdt: 'USDT',
+  c2coin: 'C2-Coin',
 };
 
 const TopupHistoryModal = ({ visible, onCancel, t }) => {

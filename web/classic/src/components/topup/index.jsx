@@ -95,6 +95,11 @@ const TopUp = () => {
   const [waffoMinTopUp, setWaffoMinTopUp] = useState(1);
   const [enableWaffoPancakeTopUp, setEnableWaffoPancakeTopUp] = useState(false);
   const [waffoPancakeMinTopUp, setWaffoPancakeMinTopUp] = useState(1);
+  const [enableC2CoinTopUp, setEnableC2CoinTopUp] = useState(false);
+  const [c2coinMinTopUp, setC2CoinMinTopUp] = useState(1);
+  const [c2coinExchangeRate, setC2CoinExchangeRate] = useState(100);
+  const [c2coinContractAddress, setC2CoinContractAddress] = useState('');
+  const [c2coinNetwork, setC2CoinNetwork] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -135,7 +140,7 @@ const TopUp = () => {
   });
 
   const confirmPayMethods = [
-    ...payMethods.filter((m) => m.type === 'usdt'),
+    ...payMethods.filter((m) => m.type === 'usdt' || m.type === 'c2coin'),
     ...waffoPayMethods.map((method, index) => ({
       ...method,
       type: `waffo:${index}`,
@@ -166,6 +171,9 @@ const TopUp = () => {
     }
     if (payment === 'usdt') {
       return getUsdtAmount(value);
+    }
+    if (payment === 'c2coin') {
+      return getC2CoinAmount(value);
     }
     return getAmount(value);
   };
@@ -235,6 +243,11 @@ const TopUp = () => {
         showError(t('管理员未开启 USDT 充值！'));
         return;
       }
+    } else if (payment === 'c2coin') {
+      if (!enableC2CoinTopUp) {
+        showError(t('管理员未开启 C2-Coin 充值！'));
+        return;
+      }
     } else {
       if (!enableOnlineTopUp) {
         showError(t('管理员未开启在线充值！'));
@@ -276,6 +289,17 @@ const TopUp = () => {
       setConfirmLoading(true);
       try {
         await usdtTopUp();
+      } finally {
+        setOpen(false);
+        setConfirmLoading(false);
+      }
+      return;
+    }
+
+    if (payWay === 'c2coin') {
+      setConfirmLoading(true);
+      try {
+        await c2coinTopUp();
       } finally {
         setOpen(false);
         setConfirmLoading(false);
@@ -562,6 +586,52 @@ const TopUp = () => {
     }
   };
 
+  const c2coinTopUp = async () => {
+    const minTopUpValue = Number(c2coinMinTopUp || 100);
+    if (topUpCount < minTopUpValue) {
+      showError(t('充值数量不能小于') + minTopUpValue);
+      return;
+    }
+
+    setPaymentLoading(true);
+    try {
+      const res = await API.post('/api/user/c2coin/pay', {
+        amount: parseInt(topUpCount),
+      });
+      if (res !== undefined) {
+        const { message, data } = res.data;
+        if (message === 'success') {
+          const { trade_no, network, contract_address, c2coin_amount, usdt_equivalent, burn_address, instructions } = data;
+          showInfo(t('订单已创建，请按以下信息转账：'));
+          const msg = t('网络: {{network}}\n合约地址: {{contract_address}}\nC2-Coin 数量: {{c2coin_amount}}\n等值 USDT: {{usdt_equivalent}}\n黑洞地址（销毁）: {{burn_address}}\n订单号: {{trade_no}}\n\n{{instructions}}', {
+            network,
+            contract_address,
+            c2coin_amount,
+            usdt_equivalent,
+            burn_address,
+            trade_no,
+            instructions: instructions || '',
+          });
+          Toast.info({
+            content: msg,
+            duration: 0,
+            closable: true,
+          });
+        } else {
+          const errorMsg =
+            typeof data === 'string' ? data : message || t('创建订单失败');
+          showError(errorMsg);
+        }
+      } else {
+        showError(res);
+      }
+    } catch (e) {
+      showError(t('创建订单失败'));
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
   const [usdtMinTopUp, setUsdtMinTopUp] = useState(
     statusState?.status?.usdt_min_topup || 1,
   );
@@ -573,6 +643,33 @@ const TopUp = () => {
     setAmountLoading(true);
     try {
       const res = await API.post('/api/user/usdt/amount', {
+        amount: parseInt(value),
+      });
+      if (res !== undefined) {
+        const { message, data } = res.data;
+        if (message === 'success') {
+          setAmount(parseFloat(data));
+        } else {
+          setAmount(0);
+          Toast.error({ content: '错误：' + data, id: 'getAmount' });
+        }
+      } else {
+        showError(res);
+      }
+    } catch (err) {
+      // amount fetch failed silently
+    } finally {
+      setAmountLoading(false);
+    }
+  };
+
+  const getC2CoinAmount = async (value) => {
+    if (value === undefined) {
+      value = topUpCount;
+    }
+    setAmountLoading(true);
+    try {
+      const res = await API.post('/api/user/c2coin/amount', {
         amount: parseInt(value),
       });
       if (res !== undefined) {
@@ -751,7 +848,7 @@ const TopUp = () => {
           // 如果启用了 Stripe 支付，添加到支付方法列表
           // 这个逻辑现在由后端处理，如果 Stripe 启用，后端会在 pay_methods 中包含它
 
-          setPayMethods(payMethods.filter((m) => m.type === 'usdt'));
+          setPayMethods(payMethods.filter((m) => m.type === 'usdt' || m.type === 'c2coin'));
           const enableStripeTopUp = data.enable_stripe_topup || false;
           const enableOnlineTopUp = data.enable_online_topup || false;
           const enableCreemTopUp = data.enable_creem_topup || false;
@@ -759,6 +856,7 @@ const TopUp = () => {
           const enableWaffoPancakeTopUp =
             data.enable_waffo_pancake_topup || false;
           const enableUsdtTopUp = data.enable_usdt_topup || false;
+          const enableC2CoinTopUp = data.enable_c2coin_topup || false;
           const minTopUpValue = enableOnlineTopUp
             ? data.min_topup
             : enableStripeTopUp
@@ -769,7 +867,9 @@ const TopUp = () => {
                   ? data.waffo_pancake_min_topup
                   : enableUsdtTopUp
                     ? data.usdt_min_topup || 1
-                    : 1;
+                    : enableC2CoinTopUp
+                      ? data.c2coin_min_topup || 100
+                      : 1;
           setEnableOnlineTopUp(enableOnlineTopUp);
           setEnableStripeTopUp(enableStripeTopUp);
           setEnableCreemTopUp(enableCreemTopUp);
@@ -778,6 +878,11 @@ const TopUp = () => {
           setWaffoMinTopUp(data.waffo_min_topup || 1);
           setEnableWaffoPancakeTopUp(enableWaffoPancakeTopUp);
           setEnableUsdtTopUp(enableUsdtTopUp);
+          setEnableC2CoinTopUp(enableC2CoinTopUp);
+          setC2CoinMinTopUp(data.c2coin_min_topup || 100);
+          setC2CoinExchangeRate(data.c2coin_exchange_rate || 100);
+          setC2CoinContractAddress(data.c2coin_contract_address || '');
+          setC2CoinNetwork(data.c2coin_network || 'Polygon Amoy');
           setUsdtMinTopUp(data.usdt_min_topup || 1);
           setWaffoPancakeMinTopUp(data.waffo_pancake_min_topup || 1);
           setMinTopUp(minTopUpValue);
@@ -1087,6 +1192,7 @@ const TopUp = () => {
           enableWaffoTopUp={enableWaffoTopUp}
           enableWaffoPancakeTopUp={enableWaffoPancakeTopUp}
           enableUsdtTopUp={enableUsdtTopUp}
+          enableC2CoinTopUp={enableC2CoinTopUp}
           presetAmounts={presetAmounts}
           selectedPreset={selectedPreset}
           selectPresetAmount={selectPresetAmount}

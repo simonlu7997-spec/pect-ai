@@ -55,6 +55,29 @@ func GetTopUpInfo(c *gin.Context) {
 	// 如果启用了 USDT 支付，添加到支付方法列表
 	enableUSDT := isUsdtTopUpEnabled()
 	if enableUSDT && complianceConfirmed {
+		payMethods = append(payMethods, map[string]string{
+			"type":         "usdt",
+			"name":         "USDT-TRC20",
+			"description":  "USDT-TRC20充值",
+			"min_topup":    strconv.Itoa(setting.UsdtMinTopUp),
+			"color":        "rgba(var(--semi-green-5), 1)",
+			"icon":         "Coins",
+		})
+	}
+
+	enableC2Coin := isC2CoinTopUpEnabled()
+	if enableC2Coin && complianceConfirmed {
+		payMethods = append(payMethods, map[string]string{
+			"type":         "c2coin",
+			"name":         "C2-Coin",
+			"description":  "C2Coin代币充值",
+			"min_topup":    strconv.Itoa(setting.C2CoinMinTopUp),
+			"color":        "rgba(var(--semi-amber-5), 1)",
+			"icon":         "DollarSign",
+		})
+	}
+
+	if enableUSDT {
 		hasUSDT := false
 		for _, method := range payMethods {
 			if method["type"] == model.PaymentMethodUSDT {
@@ -125,6 +148,7 @@ func GetTopUpInfo(c *gin.Context) {
 		"enable_stripe_topup":              isStripeTopUpEnabled(),
 		"enable_creem_topup":               isCreemTopUpEnabled(),
 		"enable_usdt_topup":                enableUSDT,
+		"enable_c2coin_topup":               enableC2Coin,
 		"enable_waffo_topup":               enableWaffo,
 		"enable_waffo_pancake_topup":       enableWaffoPancake,
 		"enable_redemption":                true,
@@ -143,6 +167,10 @@ func GetTopUpInfo(c *gin.Context) {
 		"waffo_min_topup":         setting.WaffoMinTopUp,
 		"waffo_pancake_min_topup": setting.WaffoPancakeMinTopUp,
 		"usdt_min_topup":          setting.UsdtMinTopUp,
+	"c2coin_min_topup":        setting.C2CoinMinTopUp,
+	"c2coin_exchange_rate":    setting.C2CoinExchangeRate,
+	"c2coin_contract_address": setting.C2CoinContractAddr,
+	"c2coin_network":          setting.C2CoinNetwork,
 		"amount_options":          operation_setting.GetPaymentSetting().AmountOptions,
 		"discount":                operation_setting.GetPaymentSetting().AmountDiscount,
 		"topup_link":              common.TopUpLink,
