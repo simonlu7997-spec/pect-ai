@@ -175,7 +175,25 @@ const TopUp = () => {
     if (payment === 'c2coin') {
       return getC2CoinAmount(value);
     }
-    return getAmount(value);
+    // 其他支付方式回退到旧的 USDT 直调逻辑，避免递归
+    if (value === undefined) {
+      value = topUpCount;
+    }
+    setAmountLoading(true);
+    try {
+      const res = await API.post('/api/user/usdt/amount', {
+        amount: parseFloat(value),
+      });
+      if (res !== undefined) {
+        const { message, data } = res.data;
+        if (message === 'success') {
+          setAmount(parseFloat(data));
+        } else {
+          setAmount(0);
+        }
+      }
+    } catch (err) {}
+    setAmountLoading(false);
   };
 
   const topUp = async () => {
@@ -1018,9 +1036,12 @@ const TopUp = () => {
     if (value === undefined) {
       value = topUpCount;
     }
+    // 如果有已选择的支付方式，路由到对应的金额接口
+    if (payWay) {
+      return requestAmountByPayment(payWay, value);
+    }
     setAmountLoading(true);
     try {
-      // 仅支持 USDT 充值，直接调用 USDT 金额接口
       const res = await API.post('/api/user/usdt/amount', {
         amount: parseFloat(value),
       });
