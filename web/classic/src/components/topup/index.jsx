@@ -1010,7 +1010,7 @@ const TopUp = () => {
 
   const renderAmount = () => {
     // USDT 后端返回的已是美元金额，不需要除汇率
-    const usdAmount = payWay === 'usdt' ? amount : (priceRatio > 0 ? amount / priceRatio : amount);
+    const usdAmount = payWay === 'usdt' || payWay === 'c2coin' ? amount : (priceRatio > 0 ? amount / priceRatio : amount);
     return '$' + usdAmount.toFixed(2);
   };
 
