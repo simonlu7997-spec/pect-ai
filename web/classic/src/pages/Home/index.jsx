@@ -38,6 +38,7 @@ import {
   IconFile,
   IconCopy,
 } from '@douyinfe/semi-icons';
+import { Wallet } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NoticeModal from '../../components/layout/NoticeModal';
 import {
@@ -213,7 +214,7 @@ const Home = () => {
 
                 {/* 操作按钮 */}
                 <div className='flex flex-row gap-4 justify-center items-center'>
-                  <Link to='/console'>
+                  <Link to='/console/token'>
                     <Button
                       theme='solid'
                       type='primary'
@@ -221,7 +222,7 @@ const Home = () => {
                       className='!rounded-3xl px-8 py-2'
                       icon={<IconPlay />}
                     >
-                      {t('获取密钥')}
+                      {t('获取API Key')}
                     </Button>
                   </Link>
                   {isDemoSiteMode && statusState?.status?.version ? (
@@ -239,16 +240,15 @@ const Home = () => {
                       {statusState.status.version}
                     </Button>
                   ) : (
-                    docsLink && (
+                    <Link to='/console/topup'>
                       <Button
                         size={isMobile ? 'default' : 'large'}
                         className='flex items-center !rounded-3xl px-6 py-2'
-                        icon={<IconFile />}
-                        onClick={() => window.open(docsLink, '_blank')}
+                        icon={<Wallet size={16} />}
                       >
-                        {t('文档')}
+                        {t('USDT/C2-Coin充值')}
                       </Button>
-                    )
+                    </Link>
                   )}
                 </div>
 

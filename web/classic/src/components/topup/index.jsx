@@ -88,6 +88,9 @@ const TopUp = () => {
 
   // Waffo 相关状态
   const [enableWaffoTopUp, setEnableWaffoTopUp] = useState(false);
+
+  // USDT 相关状态
+  const [enableUsdtTopUp, setEnableUsdtTopUp] = useState(false);
   const [waffoPayMethods, setWaffoPayMethods] = useState([]);
   const [waffoMinTopUp, setWaffoMinTopUp] = useState(1);
   const [enableWaffoPancakeTopUp, setEnableWaffoPancakeTopUp] = useState(false);
@@ -132,7 +135,7 @@ const TopUp = () => {
   });
 
   const confirmPayMethods = [
-    ...payMethods,
+    ...payMethods.filter((m) => m.type === 'usdt'),
     ...waffoPayMethods.map((method, index) => ({
       ...method,
       type: `waffo:${index}`,
@@ -160,6 +163,9 @@ const TopUp = () => {
     }
     if (typeof payment === 'string' && payment.startsWith('waffo:')) {
       return getWaffoAmount(value);
+    }
+    if (payment === 'usdt') {
+      return getUsdtAmount(value);
     }
     return getAmount(value);
   };
@@ -224,6 +230,11 @@ const TopUp = () => {
         showError(t('管理员未开启 Waffo 充值！'));
         return;
       }
+    } else if (payment === 'usdt') {
+      if (!enableUsdtTopUp) {
+        showError(t('管理员未开启 USDT 充值！'));
+        return;
+      }
     } else {
       if (!enableOnlineTopUp) {
         showError(t('管理员未开启在线充值！'));
@@ -254,6 +265,17 @@ const TopUp = () => {
       setConfirmLoading(true);
       try {
         await waffoPancakeTopUp();
+      } finally {
+        setOpen(false);
+        setConfirmLoading(false);
+      }
+      return;
+    }
+
+    if (payWay === 'usdt') {
+      setConfirmLoading(true);
+      try {
+        await usdtTopUp();
       } finally {
         setOpen(false);
         setConfirmLoading(false);
@@ -455,6 +477,51 @@ const TopUp = () => {
     }
   };
 
+  const usdtTopUp = async () => {
+    const minTopUpValue = Number(usdtMinTopUp || 1);
+    if (topUpCount < minTopUpValue) {
+      showError(t('充值数量不能小于') + minTopUpValue);
+      return;
+    }
+
+    setPaymentLoading(true);
+    try {
+      const res = await API.post('/api/user/usdt/pay', {
+        amount: parseInt(topUpCount),
+      });
+      if (res !== undefined) {
+        const { message, data } = res.data;
+        if (message === 'success') {
+          const { trade_no, network, address, amount, currency, instructions } = data;
+          showInfo(t('订单已创建，请按以下信息转账：'));
+          const msg = t('网络: {{network}}\n收款地址: {{address}}\n金额: {{amount}} {{currency}}\n订单号: {{trade_no}}\n\n{{instructions}}', {
+            network,
+            address,
+            amount,
+            currency,
+            trade_no,
+            instructions: instructions || '',
+          });
+          Toast.info({
+            content: msg,
+            duration: 0,
+            closable: true,
+          });
+        } else {
+          const errorMsg =
+            typeof data === 'string' ? data : message || t('创建订单失败');
+          showError(errorMsg);
+        }
+      } else {
+        showError(res);
+      }
+    } catch (e) {
+      showError(t('创建订单失败'));
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
   const waffoPancakeTopUp = async () => {
     const minTopUpValue = Number(waffoPancakeMinTopUp || 1);
     if (topUpCount < minTopUpValue) {
@@ -492,6 +559,37 @@ const TopUp = () => {
       showError(t('支付请求失败'));
     } finally {
       setPaymentLoading(false);
+    }
+  };
+
+  const [usdtMinTopUp, setUsdtMinTopUp] = useState(
+    statusState?.status?.usdt_min_topup || 1,
+  );
+
+  const getUsdtAmount = async (value) => {
+    if (value === undefined) {
+      value = topUpCount;
+    }
+    setAmountLoading(true);
+    try {
+      const res = await API.post('/api/user/usdt/amount', {
+        amount: parseInt(value),
+      });
+      if (res !== undefined) {
+        const { message, data } = res.data;
+        if (message === 'success') {
+          setAmount(parseFloat(data));
+        } else {
+          setAmount(0);
+          Toast.error({ content: '错误：' + data, id: 'getAmount' });
+        }
+      } else {
+        showError(res);
+      }
+    } catch (err) {
+      // amount fetch failed silently
+    } finally {
+      setAmountLoading(false);
     }
   };
 
@@ -653,13 +751,14 @@ const TopUp = () => {
           // 如果启用了 Stripe 支付，添加到支付方法列表
           // 这个逻辑现在由后端处理，如果 Stripe 启用，后端会在 pay_methods 中包含它
 
-          setPayMethods(payMethods);
+          setPayMethods(payMethods.filter((m) => m.type === 'usdt'));
           const enableStripeTopUp = data.enable_stripe_topup || false;
           const enableOnlineTopUp = data.enable_online_topup || false;
           const enableCreemTopUp = data.enable_creem_topup || false;
           const enableWaffoTopUp = data.enable_waffo_topup || false;
           const enableWaffoPancakeTopUp =
             data.enable_waffo_pancake_topup || false;
+          const enableUsdtTopUp = data.enable_usdt_topup || false;
           const minTopUpValue = enableOnlineTopUp
             ? data.min_topup
             : enableStripeTopUp
@@ -668,7 +767,9 @@ const TopUp = () => {
                 ? data.waffo_min_topup
                 : enableWaffoPancakeTopUp
                   ? data.waffo_pancake_min_topup
-                  : 1;
+                  : enableUsdtTopUp
+                    ? data.usdt_min_topup || 1
+                    : 1;
           setEnableOnlineTopUp(enableOnlineTopUp);
           setEnableStripeTopUp(enableStripeTopUp);
           setEnableCreemTopUp(enableCreemTopUp);
@@ -676,6 +777,8 @@ const TopUp = () => {
           setWaffoPayMethods(data.waffo_pay_methods || []);
           setWaffoMinTopUp(data.waffo_min_topup || 1);
           setEnableWaffoPancakeTopUp(enableWaffoPancakeTopUp);
+          setEnableUsdtTopUp(enableUsdtTopUp);
+          setUsdtMinTopUp(data.usdt_min_topup || 1);
           setWaffoPancakeMinTopUp(data.waffo_pancake_min_topup || 1);
           setMinTopUp(minTopUpValue);
           setTopUpCount(minTopUpValue);
@@ -801,7 +904,9 @@ const TopUp = () => {
   }, [statusState?.status]);
 
   const renderAmount = () => {
-    return amount + ' ' + t('元');
+    // USDT 后端返回的已是美元金额，不需要除汇率
+    const usdAmount = payWay === 'usdt' ? amount : (priceRatio > 0 ? amount / priceRatio : amount);
+    return '$' + usdAmount.toFixed(2);
   };
 
   const getAmount = async (value) => {
@@ -810,7 +915,8 @@ const TopUp = () => {
     }
     setAmountLoading(true);
     try {
-      const res = await API.post('/api/user/amount', {
+      // 仅支持 USDT 充值，直接调用 USDT 金额接口
+      const res = await API.post('/api/user/usdt/amount', {
         amount: parseFloat(value),
       });
       if (res !== undefined) {
@@ -980,6 +1086,7 @@ const TopUp = () => {
           creemPreTopUp={creemPreTopUp}
           enableWaffoTopUp={enableWaffoTopUp}
           enableWaffoPancakeTopUp={enableWaffoPancakeTopUp}
+          enableUsdtTopUp={enableUsdtTopUp}
           presetAmounts={presetAmounts}
           selectedPreset={selectedPreset}
           selectPresetAmount={selectPresetAmount}

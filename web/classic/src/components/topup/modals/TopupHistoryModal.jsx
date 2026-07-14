@@ -54,6 +54,7 @@ const PAYMENT_METHOD_MAP = {
   waffo: 'Waffo',
   alipay: '支付宝',
   wxpay: '微信',
+  usdt: 'USDT',
 };
 
 const TopupHistoryModal = ({ visible, onCancel, t }) => {
@@ -207,7 +208,7 @@ const TopupHistoryModal = ({ visible, onCancel, t }) => {
         title: t('支付金额'),
         dataIndex: 'money',
         key: 'money',
-        render: (money) => <Text type='danger'>¥{money.toFixed(2)}</Text>,
+        render: (money) => <Text type='danger'>${money.toFixed(2)}</Text>,
       },
       {
         title: t('状态'),
