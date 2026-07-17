@@ -38,6 +38,7 @@ import RechargeCard from './RechargeCard';
 import InvitationCard from './InvitationCard';
 import TransferModal from './modals/TransferModal';
 import PaymentConfirmModal from './modals/PaymentConfirmModal';
+import AddressDisplayModal from './modals/AddressDisplayModal';
 import TopupHistoryModal from './modals/TopupHistoryModal';
 
 // Reject non-navigable schemes (e.g. javascript:, data:) and relative URLs.
@@ -103,6 +104,8 @@ const TopUp = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [addressPayWay, setAddressPayWay] = useState('');
   const [payWay, setPayWay] = useState('');
   const [amountLoading, setAmountLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -1093,6 +1096,11 @@ const TopUp = () => {
     setOpen(false);
   };
 
+  const handleAddressCancel = () => {
+    setAddressOpen(false);
+    setAddressPayWay('');
+  };
+
   const handleTransferCancel = () => {
     setOpenTransfer(false);
   };
@@ -1164,6 +1172,7 @@ const TopUp = () => {
         payMethods={confirmPayMethods}
         amountNumber={amount}
         discountRate={topupInfo?.discount?.[topUpCount] || 1.0}
+        c2coinExchangeRate={c2coinExchangeRate}
       />
 
       {/* 充值账单模态框 */}
